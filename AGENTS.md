@@ -1,32 +1,39 @@
 # AI Contributor Guide: hphbiome
 
 This file is the shared operating manual for AI contributors working in the
-`hphbiome` repository.
+`hph-biome` repository.
 
 ## Project Snapshot
 
-- Package: `hphbiome`
-- Repository: `hph-biome`
+- Library package: `hphbiome`
+- HiperHealth adapter package: `hphbiome-hiperhealth`
+- HiperHealth channel alias: `hphbiome`
 - Runtime: Python `>=3.10,<4`
-- Packaging: `setuptools` with a `src` layout
+- Packaging: `setuptools` with per-package `src` layouts
 - Development environment: `conda/dev.yaml`
 
 ## Core Objectives
 
-1. Keep package metadata, CI, release, and tooling configuration aligned with
-   the `hphbiome` package name.
-2. Make minimal, targeted infrastructure changes with clear intent.
-3. Do not commit secrets, credentials, real PHI, or sensitive data.
-4. Keep standard checks green when project code and tests are added.
+1. Keep reusable HPH Biome logic in `packages/hphbiome` without a HiperHealth
+   dependency.
+2. Keep HiperHealth-specific integration in `packages/hphbiome-hiperhealth` and
+   `skills/hphbiome`.
+3. Keep package metadata, CI, release, and tooling configuration aligned with
+   the monorepo layout.
+4. Make minimal, targeted infrastructure changes with clear intent.
+5. Do not commit secrets, credentials, real PHI, or sensitive data.
 
 ## Repository Layout
 
-- `src/hphbiome/`: future package implementation
-- `tests/`: future pytest coverage
+- `packages/hphbiome/`: standalone reusable library package
+- `packages/hphbiome-hiperhealth/`: HiperHealth skill adapter package
+- `skills-channel.yaml`: HiperHealth skill channel metadata
+- `skills/hphbiome/`: installable HiperHealth skill manifest and entry point
+- `tests/`: pytest coverage for library, adapter, and manifests
 - `conda/dev.yaml`: cross-platform development environment definition
 - `.makim.yaml`: task runner definitions
 - `.github/workflows/`: CI, docs, and release workflows
-- `pyproject.toml`: package metadata, dependencies, and tool configuration
+- `pyproject.toml`: workspace metadata and shared tool configuration
 
 ## Tooling And Commands
 
@@ -36,6 +43,8 @@ Environment setup:
 conda env create -f conda/dev.yaml
 conda activate hphbiome
 python -m pip install -e ".[dev]"
+python -m pip install -e packages/hphbiome
+python -m pip install -e packages/hphbiome-hiperhealth
 ```
 
 If using mamba:
@@ -44,6 +53,8 @@ If using mamba:
 mamba env create -f conda/dev.yaml
 mamba activate hphbiome
 python -m pip install -e ".[dev]"
+python -m pip install -e packages/hphbiome
+python -m pip install -e packages/hphbiome-hiperhealth
 ```
 
 High-value commands:
@@ -60,9 +71,9 @@ makim tests.linter
 pre-commit run --all-files --verbose
 
 # targeted static checks
-ruff check src tests
-ruff format src tests
-mypy src/hphbiome
+ruff check packages tests
+ruff format packages tests
+mypy packages/hphbiome/src packages/hphbiome-hiperhealth/src
 
 # package build
 makim package.build

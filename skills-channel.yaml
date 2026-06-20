@@ -1,0 +1,15 @@
+api_version: 1
+channel:
+  name: hph-biome
+  display_name: HPH Biome
+  default_alias: hphbiome
+  version: 0.1.0 # semantic-release
+  description: Gut microbiome support skills for HiperHealth.
+  homepage: https://github.com/hiperhealth/hph-biome
+  license: BSD-3-Clause
+  min_hiperhealth_version: ">=0.5.0"
+
+skills:
+  - name: hphbiome
+    enabled: true
+    tags: [microbiome, diagnosis, treatment]

@@ -38,6 +38,8 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install -e ".[dev]"
+          python -m pip install -e packages/hphbiome
+          python -m pip install -e packages/hphbiome-hiperhealth
 
       - name: Generate documentation with changes from semantic-release
         run: makim --verbose docs.build

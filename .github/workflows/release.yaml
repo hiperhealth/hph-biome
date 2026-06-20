@@ -37,6 +37,8 @@ jobs:
       - name: Install deps
         run: |
           python -m pip install -e ".[dev]"
+          python -m pip install -e packages/hphbiome
+          python -m pip install -e packages/hphbiome-hiperhealth
 
       - name: Run semantic release (for tests)
         if: ${{ github.event_name != 'workflow_dispatch' }}

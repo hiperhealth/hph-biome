@@ -11,13 +11,50 @@
         "replacements": [
           {
             "files": [
-              "pyproject.toml"
+              "pyproject.toml",
+              "packages/hphbiome/pyproject.toml",
+              "packages/hphbiome-hiperhealth/pyproject.toml"
             ],
             "from": "version = \".*\"  # semantic-release",
             "to": "version = \"${nextRelease.version}\"  # semantic-release",
             "results": [
               {
                 "file": "pyproject.toml",
+                "hasChanged": true,
+                "numMatches": 1,
+                "numReplacements": 1
+              },
+              {
+                "file": "packages/hphbiome/pyproject.toml",
+                "hasChanged": true,
+                "numMatches": 1,
+                "numReplacements": 1
+              },
+              {
+                "file": "packages/hphbiome-hiperhealth/pyproject.toml",
+                "hasChanged": true,
+                "numMatches": 1,
+                "numReplacements": 1
+              }
+            ],
+            "countMatches": true
+          },
+          {
+            "files": [
+              "skills-channel.yaml",
+              "skills/hphbiome/skill.yaml"
+            ],
+            "from": "version: .* # semantic-release",
+            "to": "version: ${nextRelease.version} # semantic-release",
+            "results": [
+              {
+                "file": "skills-channel.yaml",
+                "hasChanged": true,
+                "numMatches": 1,
+                "numReplacements": 1
+              },
+              {
+                "file": "skills/hphbiome/skill.yaml",
                 "hasChanged": true,
                 "numMatches": 1,
                 "numReplacements": 1
@@ -39,7 +76,7 @@
     [
       "@semantic-release/exec",
       {
-        "prepareCmd": "python -m build",
+        "prepareCmd": "makim package.build",
         "publishCmd": "twine upload dist/* --username __token__ --password \"$PYPI_TOKEN\""
       }
     ],
@@ -57,6 +94,10 @@
       {
         "assets": [
           "pyproject.toml",
+          "packages/hphbiome/pyproject.toml",
+          "packages/hphbiome-hiperhealth/pyproject.toml",
+          "skills-channel.yaml",
+          "skills/hphbiome/skill.yaml",
           "CHANGELOG.md"
         ],
         "message": "chore(release): ${nextRelease.version}"

@@ -1,0 +1,13 @@
+name: hphbiome
+version: 0.1.0 # semantic-release
+entry_point: "skill:HPHBiomeSkill"
+stages:
+  - diagnosis
+  - treatment
+description: Adds gut microbiome context to diagnosis and treatment stages.
+author: "Ivan Ogasawara <ivan.ogasawara@gmail.com>"
+license: BSD-3-Clause
+homepage: https://github.com/hiperhealth/hph-biome
+min_hiperhealth_version: ">=0.5.0"
+dependencies:
+  - hphbiome-hiperhealth>=0.1.0

@@ -1,0 +1,43 @@
+[project]
+name = "hphbiome-hiperhealth"
+version = "0.1.0"  # semantic-release
+description = "HiperHealth skill adapter for HPH Biome"
+readme = "README.md"
+authors = [
+  {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
+]
+license = { text = "BSD 3 Clause" }
+requires-python = ">=3.10,<4"
+dependencies = [
+  "hphbiome>=0.1.0",
+]
+
+[project.optional-dependencies]
+hiperhealth = [
+  "hiperhealth>=0.5.0",
+]
+
+dev = [
+  "pytest>=7.3.2",
+]
+
+[project.urls]
+Homepage = "https://github.com/hiperhealth/hph-biome"
+Repository = "https://github.com/hiperhealth/hph-biome"
+Issues = "https://github.com/hiperhealth/hph-biome/issues"
+
+[project.entry-points."hiperhealth.skills"]
+hphbiome = "hphbiome_hiperhealth:HPHBiomeSkill"
+
+[build-system]
+requires = ["setuptools>=70.1.0,<82", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+hphbiome_hiperhealth = ["py.typed"]

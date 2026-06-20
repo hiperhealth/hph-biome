@@ -59,7 +59,7 @@ repos:
         name: mypy
         entry: mypy
         language: system
-        files: "src/hphbiome"
+        files: "^packages/.*/src/"
         pass_filenames: true
         types:
           - python
@@ -77,7 +77,7 @@ repos:
         name: vulture
         entry: vulture vulture_whitelist.py
         language: system
-        files: "src/hphbiome"
+        files: "^packages/.*/src/"
         description: Find unused Python code.
         pass_filenames: true
         types:

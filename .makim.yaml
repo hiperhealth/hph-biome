@@ -93,6 +93,7 @@ groups:
           if [ -d tests ] && find tests -type f -name 'test*.py' | grep -q .; then
             pytest \
               --cov=hphbiome \
+              --cov=hphbiome_hiperhealth \
               --cov-fail-under=92 \
               --cov-report term-missing \
               --no-cov-on-fail ${{ args.path }} ${{ args.params }}
@@ -111,8 +112,12 @@ groups:
     tasks:
       build:
         help: "Build the package"
+        backend: bash
         run: |
-          python -m build
+          rm -fr dist/
+          python -m build --no-isolation packages/hphbiome --outdir dist
+          python -m build --no-isolation packages/hphbiome-hiperhealth \
+            --outdir dist
 
   release:
     vars:

@@ -1,0 +1,29 @@
+[project]
+name = "hphbiome"
+version = "0.1.0"  # semantic-release
+description = "Reusable HPH Biome library utilities"
+readme = "README.md"
+authors = [
+  {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
+]
+license = { text = "BSD 3 Clause" }
+requires-python = ">=3.10,<4"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/hiperhealth/hph-biome"
+Repository = "https://github.com/hiperhealth/hph-biome"
+Issues = "https://github.com/hiperhealth/hph-biome/issues"
+
+[build-system]
+requires = ["setuptools>=70.1.0,<82", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+hphbiome = ["py.typed"]

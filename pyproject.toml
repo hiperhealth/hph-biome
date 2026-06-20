@@ -1,7 +1,7 @@
 [project]
-name = "hphbiome"
+name = "hph-biome-workspace"
 version = "0.1.0"  # semantic-release
-description = "HPH Biome package"
+description = "Workspace configuration for HPH Biome packages"
 readme = "README.md"
 authors = [
   {name = "Ivan Ogasawara", email = "ivan.ogasawara@gmail.com"}
@@ -9,6 +9,34 @@ authors = [
 license = { text = "BSD 3 Clause" }
 requires-python = ">=3.10,<4"
 dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "build >=1.3.0",
+  "setuptools >=70.1.0,<82",
+  "wheel",
+  "twine >=6",
+  "pytest >=7.3.2",
+  "pytest-cov >=4.1.0",
+  "coverage >=7.2.7",
+  "pre-commit >=3.3.2",
+  "ruff >=0.2.0",
+  "mypy >=1.5.0,<2",
+  "bandit >=1.7.5",
+  "vulture >=2.7",
+  "PyYAML >=6",
+  "makim ==1.27.0",
+  "mkdocs >=1.3",
+  "mkdocs-exclude >=1.0.2",
+  "mkdocs-jupyter >=0.24.7",
+  "mkdocs-literate-nav >=0.4.1",
+  "mkdocs-macros-plugin >=0.6.3",
+  "mkdocs-material >=8",
+  "mkdocstrings >=0.21.2",
+  "mkdocstrings-python >= 1.1.2",
+  "mkdocs-gen-files >=0.5.0",
+  "quarto-cli >=1.8.27",
+]
 
 [project.urls]
 Homepage = "https://github.com/hiperhealth/hph-biome"
@@ -20,45 +48,7 @@ requires = ["setuptools>=70.1.0,<82", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-package-dir = { "" = "src" }
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[project.optional-dependencies]
-notebook = [
-  "ipywidgets >=8.1,<9",
-  "ipython >=8",
-]
-
-dev = [
-  "quarto-cli >=1.8.27",
-  "build >=1.3.0",
-  "twine >=6",
-  "douki >=0.12.1",
-  "pytest >=7.3.2",
-  "pytest-cov >=4.1.0",
-  "coverage >=7.2.7",
-  "pre-commit >=3.3.2",
-  "ruff >=0.2.0",
-  "mypy >=1.5.0,<2",
-  "bandit >=1.7.5",
-  "vulture >=2.7",
-  "ipython >=8",
-  "ipykernel >=6.0.0",
-  "Jinja2 >=3.1.2",
-  "mkdocs >=1.3",
-  "mkdocs-exclude >=1.0.2",
-  "mkdocs-jupyter >=0.24.7",
-  "mkdocs-literate-nav >=0.4.1",
-  "mkdocs-macros-plugin >=0.6.3",
-  "mkdocs-material >=8",
-  "mkdocstrings >=0.21.2",
-  "mkdocstrings-python >= 1.1.2",
-  "mkdocs-gen-files >=0.5.0",
-  "makim ==1.27.0",
-  "python-multipart >=0.0.20",
-]
+packages = []
 
 [tool.bandit]
 exclude_dirs = ["tests"]
@@ -74,27 +64,24 @@ warn_unused_ignores = true
 warn_redundant_casts = true
 warn_unused_configs = true
 exclude = ["scripts/"]
-plugins = [
-  "pydantic.mypy",
-]
 
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
 ]
 pythonpath = [
-    "src",
+    "packages/hphbiome/src",
+    "packages/hphbiome-hiperhealth/src",
 ]
 filterwarnings = [
     "error::RuntimeWarning",
-    "error::typeguard.TypeHintWarning",
 ]
 
 [tool.ruff]
 target-version = "py310"
 line-length = 79
 force-exclude = true
-src = ["./"]
+src = ["packages", "tests"]
 exclude = [
   'docs',
 ]
@@ -129,6 +116,6 @@ ignore_decorators = []
 ignore_names = []
 make_whitelist = true
 min_confidence = 80
-paths = ["./", "vulture_whitelist.py"]
+paths = ["packages", "vulture_whitelist.py"]
 sort_by_size = true
 verbose = false
