@@ -17,6 +17,13 @@ python -m pip install -e packages/hphbiome
 python -m pip install -e packages/hphbiome-hiperhealth
 ```
 
+To build the documentation, install the documentation dependencies in
+addition to the development dependencies:
+
+```bash
+python -m pip install -e ".[dev,docs]"
+```
+
 ## HiperHealth channel usage
 
 After installing the HiperHealth host application, register this repository as a
