@@ -50,7 +50,7 @@ python -m pip install -e packages/hphbiome-hiperhealth
 Documentation setup:
 
 ```bash
-python -m pip install -e ".[dev,docs]"
+python -m pip install -e ".[docs]"
 ```
 
 If using mamba:

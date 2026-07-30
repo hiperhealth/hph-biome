@@ -17,11 +17,10 @@ python -m pip install -e packages/hphbiome
 python -m pip install -e packages/hphbiome-hiperhealth
 ```
 
-To build the documentation, install the documentation dependencies in
-addition to the development dependencies:
+To build the documentation, install the documentation dependencies:
 
 ```bash
-python -m pip install -e ".[dev,docs]"
+python -m pip install -e ".[docs]"
 ```
 
 ## HiperHealth channel usage
