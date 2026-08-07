@@ -135,15 +135,5 @@ body:
     validations:
       required: true
 
-  - type: checkboxes
-    attributes:
-      label: Code of Conduct
-      description: |
-        Read the [`hphbiome` Code of Conduct][CoC] first.
-
-        [CoC]: https://github.com/hiperhealth/hph-biome/coc/CODE_OF_CONDUCT.md
-      options:
-        - label: I agree to follow the Code of Conduct
-          required: true
 ---
 This template has been adopted from [pyhf](https://github.com/scikit-hep/pyhf/tree/main/.github/ISSUE_TEMPLATE)'s excellent bug report template.
