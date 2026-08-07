@@ -10,6 +10,3 @@ contact_links:
     about: |
       The hphbiome tutorial is continually updated and provides an in depth walkthrough
       of how to use the latest release of hphbiome.
-  - name: 📝  hphbiome Code of Conduct
-    url: https://github.com/hiperhealth/hph-biome/coc/CODE_OF_CONDUCT.md
-    about: Expectations for how people will interact with each other on hphbiome's GitHub.

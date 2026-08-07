@@ -31,3 +31,19 @@ def test_skill_manifest_matches_expected_channel_layout() -> None:
     assert manifest['stages'] == ['diagnosis', 'treatment']
     assert 'hphbiome-hiperhealth>=0.1.0' in manifest['dependencies']
     assert (manifest_path.parent / 'skill.py').is_file()
+
+
+def test_issue_templates_have_valid_yaml_and_community_links() -> None:
+    templates = ROOT / '.github' / 'ISSUE_TEMPLATE'
+    code_of_conduct = ROOT / 'CODE_OF_CONDUCT.md'
+
+    for template in templates.glob('*.yml'):
+        text = template.read_text(encoding='utf-8')
+        documents = list(yaml.safe_load_all(text))
+
+        assert documents
+        assert isinstance(documents[0], dict)
+        if 'github.com/hiperhealth/hph-biome' in text:
+            assert (
+                'CODE_OF_CONDUCT.md' not in text or code_of_conduct.is_file()
+            )
