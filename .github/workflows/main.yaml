@@ -118,8 +118,6 @@ jobs:
 
       - name: Run style checks
         if: success() || failure()
-        env:
-          MYPY_CACHE_DIR: ${{ runner.temp }}/mypy-cache
         run: |
           pre-commit install
           makim tests.linter
