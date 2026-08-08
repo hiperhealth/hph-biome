@@ -12,6 +12,7 @@ from hphbiome.core import (
     has_value,
     missing_recommended_fields,
 )
+from hphbiome.knowledge import CuratedKnowledgeRecord
 
 
 def _version() -> str:
@@ -26,6 +27,7 @@ __version__ = _version()
 __all__ = [
     'FIELD_LABELS',
     'RECOMMENDED_BIOME_FIELDS',
+    'CuratedKnowledgeRecord',
     '__version__',
     'build_biome_context',
     'build_prompt_fragment',
