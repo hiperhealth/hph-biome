@@ -51,6 +51,7 @@ repos:
         language: system
         files: "^packages/.*/src/"
         pass_filenames: true
+        require_serial: yes
         types:
           - python
 
