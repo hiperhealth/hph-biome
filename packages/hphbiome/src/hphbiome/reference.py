@@ -16,6 +16,9 @@ def _validate_non_blank_string(field_name: str, value: object) -> None:
 class ScientificReference:
     """Metadata for one scientific source.
 
+    ``identifier`` is an opaque stable identifier supplied by the caller.
+    Identifier formats such as DOI and PMID are not validated by this model.
+
     Instances are not deduplicated or merged. Exact duplicates compare equal,
     so callers can choose whether an ordered collection preserves them or a
     set removes them.
