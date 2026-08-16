@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
 
+from hphbiome.collection import KnowledgeCollection
 from hphbiome.core import (
     FIELD_LABELS,
     RECOMMENDED_BIOME_FIELDS,
@@ -29,6 +30,7 @@ __all__ = [
     'FIELD_LABELS',
     'RECOMMENDED_BIOME_FIELDS',
     'CuratedKnowledgeRecord',
+    'KnowledgeCollection',
     'ScientificReference',
     '__version__',
     'build_biome_context',
