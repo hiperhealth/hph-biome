@@ -15,6 +15,7 @@ from hphbiome.core import (
 )
 from hphbiome.knowledge import CuratedKnowledgeRecord
 from hphbiome.reference import ScientificReference
+from hphbiome.retrieval import RetrievedKnowledge
 
 
 def _version() -> str:
@@ -31,6 +32,7 @@ __all__ = [
     'RECOMMENDED_BIOME_FIELDS',
     'CuratedKnowledgeRecord',
     'KnowledgeCollection',
+    'RetrievedKnowledge',
     'ScientificReference',
     '__version__',
     'build_biome_context',
