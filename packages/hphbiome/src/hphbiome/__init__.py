@@ -15,7 +15,7 @@ from hphbiome.core import (
 )
 from hphbiome.knowledge import CuratedKnowledgeRecord
 from hphbiome.reference import ScientificReference
-from hphbiome.retrieval import RetrievedKnowledge
+from hphbiome.retrieval import RetrievedKnowledge, retrieve_knowledge
 
 
 def _version() -> str:
@@ -41,4 +41,5 @@ __all__ = [
     'field_label',
     'has_value',
     'missing_recommended_fields',
+    'retrieve_knowledge',
 ]

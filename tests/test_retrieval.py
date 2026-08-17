@@ -4,8 +4,10 @@ import pytest
 
 from hphbiome import (
     CuratedKnowledgeRecord,
+    KnowledgeCollection,
     RetrievedKnowledge,
     ScientificReference,
+    retrieve_knowledge,
 )
 
 
@@ -33,6 +35,23 @@ def make_result() -> RetrievedKnowledge:
         record=make_record(),
         score=2.5,
         references=[make_reference('Alpha-001')],
+    )
+
+
+def make_search_record(
+    record_id: str,
+    *,
+    title: str,
+    synthesis: str,
+    references: list[str] | None = None,
+    review_status: str = 'fictional-review-state',
+) -> CuratedKnowledgeRecord:
+    return CuratedKnowledgeRecord(
+        id=record_id,
+        title=title,
+        synthesis=synthesis,
+        references=[] if references is None else references,
+        review_status=review_status,
     )
 
 
@@ -161,3 +180,162 @@ def test_to_dict_is_deterministic() -> None:
     assert first == expected
     assert second == expected
     assert list(first) == ['record', 'score', 'references']
+
+
+def test_retrieval_matches_titles_and_syntheses_case_insensitively() -> None:
+    title_match = make_search_record(
+        'fictional-record-title',
+        title='Amber Constellation',
+        synthesis='Fictional background text.',
+    )
+    synthesis_match = make_search_record(
+        'fictional-record-synthesis',
+        title='Fictional note',
+        synthesis='A constellation appears in this fictional synthesis.',
+    )
+    collection = KnowledgeCollection(records=[title_match, synthesis_match])
+
+    results = retrieve_knowledge(collection, 'CONSTELLATION')
+
+    assert tuple(result.record for result in results) == (
+        title_match,
+        synthesis_match,
+    )
+    assert tuple(result.score for result in results) == (1.0, 1.0)
+
+
+def test_retrieval_ranks_by_distinct_query_token_coverage() -> None:
+    full_match = make_search_record(
+        'fictional-record-full',
+        title='Amber note',
+        synthesis='A fictional comet observation.',
+    )
+    partial_match = make_search_record(
+        'fictional-record-partial',
+        title='Amber archive',
+        synthesis='Fictional background text.',
+    )
+    collection = KnowledgeCollection(records=[partial_match, full_match])
+
+    results = retrieve_knowledge(collection, 'amber comet comet')
+
+    assert tuple(result.record for result in results) == (
+        full_match,
+        partial_match,
+    )
+    assert tuple(result.score for result in results) == (1.0, 0.5)
+
+
+def test_retrieval_ties_preserve_collection_order() -> None:
+    first = make_search_record(
+        'fictional-record-z',
+        title='Shared token',
+        synthesis='First fictional synthesis.',
+    )
+    second = make_search_record(
+        'fictional-record-a',
+        title='Another note',
+        synthesis='Second fictional synthesis with a shared token.',
+    )
+    collection = KnowledgeCollection(records=[first, second])
+
+    results = retrieve_knowledge(collection, 'shared')
+
+    assert tuple(result.record for result in results) == (first, second)
+
+
+def test_retrieval_returns_resolved_provenance_in_record_order() -> None:
+    identifier = 'fictional-id:alpha'
+    canonical_url = 'https://example.test/sources/beta'
+    identifier_reference = ScientificReference(
+        title='Fictional identifier source',
+        authors=['Example Author Alpha'],
+        source='Imaginary Research Review',
+        identifier=identifier,
+    )
+    url_reference = ScientificReference(
+        title='Fictional URL source',
+        authors=['Example Author Beta'],
+        source='Imaginary Research Review',
+        canonical_url=canonical_url,
+    )
+    record = make_search_record(
+        'fictional-record-1',
+        title='Traceable constellation',
+        synthesis='Fictional provenance example.',
+        references=[canonical_url, identifier],
+    )
+    collection = KnowledgeCollection(
+        records=[record],
+        references=[identifier_reference, url_reference],
+    )
+
+    result = retrieve_knowledge(collection, 'traceable')[0]
+
+    assert result.references == (url_reference, identifier_reference)
+
+
+def test_retrieval_searches_only_title_and_synthesis() -> None:
+    metadata_value = 'metadata-only-token'
+    reference = ScientificReference(
+        title='Fictional source',
+        authors=['Example Author'],
+        source='Imaginary Research Review',
+        identifier=metadata_value,
+    )
+    record = make_search_record(
+        metadata_value,
+        title='Fictional title',
+        synthesis='Fictional synthesis.',
+        references=[metadata_value],
+        review_status=metadata_value,
+    )
+    collection = KnowledgeCollection(
+        records=[record],
+        references=[reference],
+    )
+
+    assert retrieve_knowledge(collection, 'metadata') == ()
+
+
+@pytest.mark.parametrize('query', ['', '  '], ids=['empty', 'whitespace'])
+def test_retrieval_rejects_blank_queries(query: str) -> None:
+    with pytest.raises(ValueError, match=r'^query must not be blank$'):
+        retrieve_knowledge(KnowledgeCollection(), query)
+
+
+@pytest.mark.parametrize(
+    'query',
+    [None, 42],
+    ids=['none', 'integer'],
+)
+def test_retrieval_rejects_non_string_queries(query: object) -> None:
+    with pytest.raises(TypeError, match=r'^query must be a string$'):
+        retrieve_knowledge(KnowledgeCollection(), query)
+
+
+def test_retrieval_rejects_invalid_collections() -> None:
+    with pytest.raises(
+        TypeError,
+        match=r'^collection must be a KnowledgeCollection$',
+    ):
+        retrieve_knowledge('not-a-collection', 'fictional')
+
+
+def test_retrieval_returns_empty_immutable_results_deterministically() -> None:
+    collection = KnowledgeCollection(
+        records=[
+            make_search_record(
+                'fictional-record-1',
+                title='Fictional title',
+                synthesis='Fictional synthesis.',
+            )
+        ]
+    )
+
+    first = retrieve_knowledge(collection, '---')
+    second = retrieve_knowledge(collection, 'missing')
+
+    assert first == ()
+    assert second == ()
+    assert retrieve_knowledge(collection, 'missing') == second

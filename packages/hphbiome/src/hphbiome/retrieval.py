@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import re
+
 from collections.abc import Sequence
 from dataclasses import dataclass
 from math import isfinite
 
+from hphbiome.collection import KnowledgeCollection
 from hphbiome.knowledge import CuratedKnowledgeRecord
 from hphbiome.reference import ScientificReference
+
+_WORD_PATTERN = re.compile(r'\w+')
 
 
 def _normalize_references(value: object) -> tuple[ScientificReference, ...]:
@@ -59,3 +64,47 @@ class RetrievedKnowledge:
                 reference.to_dict() for reference in self.references
             ],
         }
+
+
+def _word_tokens(text: str) -> tuple[str, ...]:
+    return tuple(_WORD_PATTERN.findall(text.casefold()))
+
+
+def retrieve_knowledge(
+    collection: KnowledgeCollection,
+    query: str,
+) -> tuple[RetrievedKnowledge, ...]:
+    """Return deterministic lexical matches from titles and syntheses.
+
+    The score is the fraction of distinct query word tokens present in a
+    record's title or synthesis. Higher scores rank first, and ties preserve
+    the record order from ``collection``.
+    """
+    if not isinstance(collection, KnowledgeCollection):
+        raise TypeError('collection must be a KnowledgeCollection')
+    if not isinstance(query, str):
+        raise TypeError('query must be a string')
+    if not query.strip():
+        raise ValueError('query must not be blank')
+
+    query_tokens = tuple(dict.fromkeys(_word_tokens(query)))
+    if not query_tokens:
+        return ()
+
+    ranked_results: list[tuple[int, RetrievedKnowledge]] = []
+    for index, record in enumerate(collection.records):
+        record_tokens = set(_word_tokens(record.title))
+        record_tokens.update(_word_tokens(record.synthesis))
+        match_count = sum(token in record_tokens for token in query_tokens)
+        if not match_count:
+            continue
+
+        result = RetrievedKnowledge(
+            record=record,
+            score=match_count / len(query_tokens),
+            references=collection.resolve_references(record.id),
+        )
+        ranked_results.append((index, result))
+
+    ranked_results.sort(key=lambda item: (-item[1].score, item[0]))
+    return tuple(result for _, result in ranked_results)
