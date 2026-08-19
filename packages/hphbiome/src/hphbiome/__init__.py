@@ -16,6 +16,11 @@ from hphbiome.core import (
 from hphbiome.knowledge import CuratedKnowledgeRecord
 from hphbiome.reference import ScientificReference
 from hphbiome.retrieval import RetrievedKnowledge, retrieve_knowledge
+from hphbiome.serialization import (
+    KNOWLEDGE_COLLECTION_SCHEMA_VERSION,
+    knowledge_collection_from_dict,
+    knowledge_collection_to_dict,
+)
 
 
 def _version() -> str:
@@ -29,6 +34,7 @@ __version__ = _version()
 
 __all__ = [
     'FIELD_LABELS',
+    'KNOWLEDGE_COLLECTION_SCHEMA_VERSION',
     'RECOMMENDED_BIOME_FIELDS',
     'CuratedKnowledgeRecord',
     'KnowledgeCollection',
@@ -40,6 +46,8 @@ __all__ = [
     'field_description',
     'field_label',
     'has_value',
+    'knowledge_collection_from_dict',
+    'knowledge_collection_to_dict',
     'missing_recommended_fields',
     'retrieve_knowledge',
 ]
