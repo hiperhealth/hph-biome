@@ -15,6 +15,7 @@ from hphbiome.core import (
 )
 from hphbiome.knowledge import CuratedKnowledgeRecord
 from hphbiome.reference import ScientificReference
+from hphbiome.retrieval import RetrievedKnowledge
 from hphbiome.serialization import (
     KNOWLEDGE_COLLECTION_SCHEMA_VERSION,
     knowledge_collection_from_dict,
@@ -37,6 +38,7 @@ __all__ = [
     'RECOMMENDED_BIOME_FIELDS',
     'CuratedKnowledgeRecord',
     'KnowledgeCollection',
+    'RetrievedKnowledge',
     'ScientificReference',
     '__version__',
     'build_biome_context',
