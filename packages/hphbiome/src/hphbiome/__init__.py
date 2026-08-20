@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from importlib.metadata import PackageNotFoundError, version
 
+from hphbiome.article import ArticleText, load_article_texts
 from hphbiome.collection import KnowledgeCollection
 from hphbiome.context import (
     build_structured_knowledge_context,
@@ -40,6 +41,7 @@ __all__ = [
     'FIELD_LABELS',
     'KNOWLEDGE_COLLECTION_SCHEMA_VERSION',
     'RECOMMENDED_BIOME_FIELDS',
+    'ArticleText',
     'CuratedKnowledgeRecord',
     'KnowledgeCollection',
     'RetrievedKnowledge',
@@ -54,6 +56,7 @@ __all__ = [
     'has_value',
     'knowledge_collection_from_dict',
     'knowledge_collection_to_dict',
+    'load_article_texts',
     'missing_recommended_fields',
     'retrieve_knowledge',
 ]
