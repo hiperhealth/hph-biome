@@ -3,6 +3,10 @@ from __future__ import annotations
 from importlib.metadata import PackageNotFoundError, version
 
 from hphbiome.collection import KnowledgeCollection
+from hphbiome.context import (
+    build_structured_knowledge_context,
+    build_text_knowledge_context,
+)
 from hphbiome.core import (
     FIELD_LABELS,
     RECOMMENDED_BIOME_FIELDS,
@@ -43,6 +47,8 @@ __all__ = [
     '__version__',
     'build_biome_context',
     'build_prompt_fragment',
+    'build_structured_knowledge_context',
+    'build_text_knowledge_context',
     'field_description',
     'field_label',
     'has_value',
