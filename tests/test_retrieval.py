@@ -339,3 +339,204 @@ def test_retrieval_returns_empty_immutable_results_deterministically() -> None:
     assert first == ()
     assert second == ()
     assert retrieve_knowledge(collection, 'missing') == second
+
+
+def test_retrieval_filters_one_or_multiple_review_statuses() -> None:
+    first = make_search_record(
+        'fictional-record-first',
+        title='Amber first',
+        synthesis='Fictional synthesis.',
+        review_status='fictional-status-a',
+    )
+    second = make_search_record(
+        'fictional-record-second',
+        title='Amber second',
+        synthesis='Fictional synthesis.',
+        review_status='fictional-status-b',
+    )
+    excluded = make_search_record(
+        'fictional-record-excluded',
+        title='Amber excluded',
+        synthesis='Fictional synthesis.',
+        review_status='fictional-status-c',
+    )
+    collection = KnowledgeCollection(records=[first, second, excluded])
+
+    one_status = retrieve_knowledge(
+        collection,
+        'amber',
+        allowed_review_statuses=['fictional-status-b'],
+    )
+    multiple_statuses = retrieve_knowledge(
+        collection,
+        'amber',
+        allowed_review_statuses={
+            'fictional-status-a',
+            'fictional-status-b',
+        },
+    )
+
+    assert tuple(result.record for result in one_status) == (second,)
+    assert tuple(result.record for result in multiple_statuses) == (
+        first,
+        second,
+    )
+
+
+def test_retrieval_distinguishes_no_allowlist_from_empty_allowlist() -> None:
+    record = make_search_record(
+        'fictional-record-1',
+        title='Amber record',
+        synthesis='Fictional synthesis.',
+        review_status='fictional-status-a',
+    )
+    collection = KnowledgeCollection(records=[record])
+
+    unfiltered = retrieve_knowledge(collection, 'amber')
+    explicitly_unfiltered = retrieve_knowledge(
+        collection, 'amber', allowed_review_statuses=None
+    )
+    empty_allowlist = retrieve_knowledge(
+        collection, 'amber', allowed_review_statuses=[]
+    )
+
+    assert tuple(result.record for result in unfiltered) == (record,)
+    assert explicitly_unfiltered == unfiltered
+    assert empty_allowlist == ()
+
+
+@pytest.mark.parametrize(
+    ('limit', 'expected_count'),
+    [(1, 1), (2, 2), (10, 3)],
+    ids=['one', 'several', 'oversized'],
+)
+def test_retrieval_applies_positive_result_limits(
+    limit: int, expected_count: int
+) -> None:
+    collection = KnowledgeCollection(
+        records=[
+            make_search_record(
+                f'fictional-record-{index}',
+                title='Amber record',
+                synthesis=f'Fictional synthesis {index}.',
+            )
+            for index in range(3)
+        ]
+    )
+
+    results = retrieve_knowledge(collection, 'amber', limit=limit)
+
+    assert len(results) == expected_count
+    assert (
+        tuple(result.record for result in results)
+        == collection.records[:expected_count]
+    )
+
+
+@pytest.mark.parametrize('limit', [0, -1], ids=['zero', 'negative'])
+def test_retrieval_rejects_non_positive_limits(limit: int) -> None:
+    with pytest.raises(ValueError, match=r'^limit must be greater than zero$'):
+        retrieve_knowledge(KnowledgeCollection(), 'fictional', limit=limit)
+
+
+@pytest.mark.parametrize(
+    'limit', [True, 1.5, '1'], ids=['boolean', 'float', 'string']
+)
+def test_retrieval_rejects_non_integer_limits(limit: object) -> None:
+    with pytest.raises(TypeError, match=r'^limit must be an integer$'):
+        retrieve_knowledge(KnowledgeCollection(), 'fictional', limit=limit)
+
+
+@pytest.mark.parametrize(
+    'allowed_review_statuses',
+    ['fictional-status', {'fictional-status': True}, 42],
+    ids=['string', 'mapping', 'integer'],
+)
+def test_retrieval_rejects_invalid_allowlist_containers(
+    allowed_review_statuses: object,
+) -> None:
+    with pytest.raises(
+        TypeError,
+        match=(
+            r'^allowed_review_statuses must be a sequence or set of strings$'
+        ),
+    ):
+        retrieve_knowledge(
+            KnowledgeCollection(),
+            'fictional',
+            allowed_review_statuses=allowed_review_statuses,
+        )
+
+
+@pytest.mark.parametrize(
+    ('allowed_review_statuses', 'error_type', 'message'),
+    [
+        (
+            ['fictional-status', 42],
+            TypeError,
+            r'^allowed_review_statuses must contain only strings$',
+        ),
+        (
+            {'fictional-status', '  '},
+            ValueError,
+            r'^allowed_review_statuses must not contain blank values$',
+        ),
+    ],
+    ids=['non-string', 'blank'],
+)
+def test_retrieval_validates_allowlist_entries(
+    allowed_review_statuses: object,
+    error_type: type[Exception],
+    message: str,
+) -> None:
+    with pytest.raises(error_type, match=message):
+        retrieve_knowledge(
+            KnowledgeCollection(),
+            'fictional',
+            allowed_review_statuses=allowed_review_statuses,
+        )
+
+
+def test_retrieval_filters_then_ranks_and_limits_with_provenance() -> None:
+    reference_identifier = 'fictional-id:source'
+    reference = ScientificReference(
+        title='Fictional source',
+        authors=['Example Author'],
+        source='Imaginary Research Review',
+        identifier=reference_identifier,
+    )
+    excluded_high_score = make_search_record(
+        'fictional-record-excluded',
+        title='Amber comet',
+        synthesis='Fictional synthesis.',
+        review_status='fictional-status-excluded',
+    )
+    eligible_partial = make_search_record(
+        'fictional-record-partial',
+        title='Amber record',
+        synthesis='Fictional synthesis.',
+        review_status='fictional-status-eligible',
+    )
+    eligible_full = make_search_record(
+        'fictional-record-full',
+        title='Amber comet',
+        synthesis='Fictional synthesis.',
+        references=[reference_identifier],
+        review_status='fictional-status-eligible',
+    )
+    collection = KnowledgeCollection(
+        records=[excluded_high_score, eligible_partial, eligible_full],
+        references=[reference],
+    )
+
+    results = retrieve_knowledge(
+        collection,
+        'amber comet',
+        allowed_review_statuses=['fictional-status-eligible'],
+        limit=1,
+    )
+
+    assert len(results) == 1
+    assert results[0].record is eligible_full
+    assert results[0].score == 1.0
+    assert results[0].references == (reference,)
