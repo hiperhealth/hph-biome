@@ -6,7 +6,9 @@ from hphbiome import (
     KnowledgeCollection,
     ScientificReference,
     knowledge_collection_from_dict,
+    knowledge_collection_from_json,
     knowledge_collection_to_dict,
+    knowledge_collection_to_json,
 )
 
 
@@ -297,3 +299,117 @@ def test_from_dict_rejects_dangling_record_references() -> None:
         ),
     ):
         knowledge_collection_from_dict(serialized)
+
+
+def test_empty_collection_json_round_trip_has_stable_formatting() -> None:
+    expected = (
+        '{\n  "schema_version": 1,\n  "references": [],\n  "records": []\n}\n'
+    )
+
+    first = knowledge_collection_to_json(KnowledgeCollection())
+    second = knowledge_collection_to_json(KnowledgeCollection())
+
+    assert first == expected
+    assert second == expected
+    assert knowledge_collection_from_json(first) == KnowledgeCollection()
+
+
+def test_populated_collection_json_round_trip_preserves_provenance() -> None:
+    collection = make_collection()
+
+    reconstructed = knowledge_collection_from_json(
+        knowledge_collection_to_json(collection)
+    )
+
+    assert reconstructed == collection
+    assert reconstructed.resolve_references('fictional-record-b') == (
+        collection.references[1],
+        collection.references[0],
+    )
+
+
+def test_json_serialization_preserves_unicode_text() -> None:
+    reference = ScientificReference(
+        title='Fictional café source',
+        authors=['Zoë Example'],
+        source='Imaginary Unicode Review',
+        identifier='fictional-id:unicode',
+    )
+    record = CuratedKnowledgeRecord(
+        id='fictional-record-unicode',
+        title='Fictional café title',
+        synthesis='Fictional synthesis with Δ and 日本語.',
+        references=['fictional-id:unicode'],
+        review_status='fictional-reviewed',
+    )
+    collection = KnowledgeCollection(
+        records=[record],
+        references=[reference],
+    )
+
+    serialized = knowledge_collection_to_json(collection)
+
+    assert 'Fictional café source' in serialized
+    assert 'Zoë Example' in serialized
+    assert 'Fictional synthesis with Δ and 日本語.' in serialized
+    assert knowledge_collection_from_json(serialized) == collection
+
+
+def test_from_json_requires_a_string() -> None:
+    with pytest.raises(TypeError, match=r'^value must be a JSON string$'):
+        knowledge_collection_from_json({})  # type: ignore[arg-type]
+
+
+def test_from_json_rejects_malformed_json_with_location() -> None:
+    with pytest.raises(
+        ValueError,
+        match=(
+            r'^invalid knowledge collection JSON at line 1, column 2: '
+            r'Expecting property name enclosed in double quotes$'
+        ),
+    ):
+        knowledge_collection_from_json('{not-json}')
+
+
+@pytest.mark.parametrize(
+    'value',
+    ['[]', 'null', 'true', '42', '"text"'],
+    ids=['array', 'null', 'boolean', 'number', 'string'],
+)
+def test_from_json_rejects_non_object_top_level_values(value: str) -> None:
+    with pytest.raises(
+        TypeError,
+        match=(
+            r'^knowledge collection JSON must contain an object at the top '
+            r'level$'
+        ),
+    ):
+        knowledge_collection_from_json(value)
+
+
+def test_from_json_preserves_unsupported_version_error() -> None:
+    serialized = knowledge_collection_to_json(KnowledgeCollection())
+    unsupported = serialized.replace(
+        '"schema_version": 1', '"schema_version": 2'
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r'^unsupported schema_version: 2$',
+    ):
+        knowledge_collection_from_json(unsupported)
+
+
+def test_from_json_preserves_nested_domain_error() -> None:
+    serialized = knowledge_collection_to_json(make_collection())
+    invalid = serialized.replace(
+        '"review_status": "fictional-review-state"',
+        '"review_status": "  "',
+        1,
+    )
+
+    with pytest.raises(
+        ValueError,
+        match=r'^records\[0\]: review_status must not be blank$',
+    ):
+        knowledge_collection_from_json(invalid)
