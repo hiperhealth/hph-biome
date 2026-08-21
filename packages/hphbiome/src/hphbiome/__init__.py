@@ -24,7 +24,9 @@ from hphbiome.retrieval import RetrievedKnowledge, retrieve_knowledge
 from hphbiome.serialization import (
     KNOWLEDGE_COLLECTION_SCHEMA_VERSION,
     knowledge_collection_from_dict,
+    knowledge_collection_from_json,
     knowledge_collection_to_dict,
+    knowledge_collection_to_json,
 )
 
 
@@ -55,7 +57,9 @@ __all__ = [
     'field_label',
     'has_value',
     'knowledge_collection_from_dict',
+    'knowledge_collection_from_json',
     'knowledge_collection_to_dict',
+    'knowledge_collection_to_json',
     'load_article_texts',
     'missing_recommended_fields',
     'retrieve_knowledge',

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from collections.abc import Mapping, Sequence
 from typing import cast
 
@@ -113,3 +115,44 @@ def knowledge_collection_from_dict(
         )
     )
     return KnowledgeCollection(records=records, references=references)
+
+
+def knowledge_collection_to_json(collection: KnowledgeCollection) -> str:
+    """Serialize a collection as deterministic, Unicode-preserving JSON.
+
+    The output follows the dictionary schema's field order, uses two-space
+    indentation and stable separators, and ends with one newline.
+    """
+    value = knowledge_collection_to_dict(collection)
+    return (
+        json.dumps(
+            value,
+            ensure_ascii=False,
+            allow_nan=False,
+            indent=2,
+            separators=(',', ': '),
+            sort_keys=False,
+        )
+        + '\n'
+    )
+
+
+def knowledge_collection_from_json(value: str) -> KnowledgeCollection:
+    """Parse JSON text and reconstruct a validated knowledge collection."""
+    if not isinstance(value, str):
+        raise TypeError('value must be a JSON string')
+
+    try:
+        parsed = json.loads(value)
+    except json.JSONDecodeError as error:
+        raise ValueError(
+            'invalid knowledge collection JSON at '
+            f'line {error.lineno}, column {error.colno}: {error.msg}'
+        ) from error
+
+    if not isinstance(parsed, dict):
+        raise TypeError(
+            'knowledge collection JSON must contain an object at the top level'
+        )
+
+    return knowledge_collection_from_dict(cast(Mapping[str, object], parsed))
